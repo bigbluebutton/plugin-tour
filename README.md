@@ -41,7 +41,7 @@ npm run build-bundle
 
 The above command will generate the `dist` folder, containing the bundled JavaScript file named `TourPlugin.js`. This file can be hosted on any HTTPS server.
 
-Alternatively, you can host the bundled file on the BigBlueButton server by copying dist/TourPlugin.js to the folder /var/www/bigbluebutton-default/assets/plugins. In this case, the <<PLUGIN_URL>> will be https://<your-host>/plugins/QuestionsPlugin.js.
+Alternatively, you can host the bundled file on the BigBlueButton server by copying dist/TourPlugin.js to the folder /var/www/bigbluebutton-default/assets/plugins. In this case, the <<PLUGIN_URL>> will be https://<your-host>/plugins/TourPlugin.js.
 
 ## Background
 

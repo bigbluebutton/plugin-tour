@@ -1,15 +1,18 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 import * as React from 'react';
 import { useEffect } from 'react';
-import Shepherd from "shepherd.js";
-import {IntlShape, createIntl, defineMessages} from 'react-intl'
+import Shepherd from 'shepherd.js';
+import { IntlShape, createIntl, defineMessages } from 'react-intl';
 import {
   BbbPluginSdk, OptionsDropdownOption, PluginApi,
   pluginLogger, UserListUiDataNames, IntlLocaleUiDataNames,
+  LayoutPresentatioAreaUiDataNames, UiLayouts,
 } from 'bigbluebutton-html-plugin-sdk';
 import { TourPluginProps } from './types';
-import getTourFeatures from "./getTourFeatures";
-import "shepherd.js/dist/css/shepherd.css";
-import "./custom.css";
+import getTourFeatures from './getTourFeatures';
+import 'shepherd.js/dist/css/shepherd.css';
+import './custom.css';
 
 const intlMessages = defineMessages({
   start: {
@@ -23,8 +26,14 @@ const intlMessages = defineMessages({
  * @param {IntlShape} intl Intl object from react-intl
  * @param {Object} URLS object with urls to link in know more buttons (from settings)
  */
-export function startTour(intl: IntlShape, URLS: Object, pluginApi: PluginApi, userListOpened: Boolean) {
-    // Docs: https://docs.shepherdpro.com/guides/usage/
+export function startTour(
+  intl: IntlShape,
+  URLS: object,
+  pluginApi: PluginApi,
+  userListOpened: boolean,
+  presentationInitiallyOpened: boolean,
+) {
+  // Docs: https://docs.shepherdpro.com/guides/usage/
   const tour = new Shepherd.Tour({
     defaultStepOptions: {
       cancelIcon: {
@@ -35,20 +44,26 @@ export function startTour(intl: IntlShape, URLS: Object, pluginApi: PluginApi, u
     useModalOverlay: true,
   });
 
-  for (const feature of getTourFeatures(intl, tour, URLS, pluginApi, userListOpened)) {
-    for (const step of feature.steps) {
+  getTourFeatures(
+    intl,
+    tour,
+    URLS,
+    pluginApi,
+    userListOpened,
+    presentationInitiallyOpened,
+  ).forEach((feature) => {
+    feature.steps.forEach((step) => {
       /* @ts-ignore */
       tour.addStep({
         ...step,
         // Only show step if the element is visible
-        showOn: () => {
-          return !!document.querySelector(
-            step.attachTo.element
-          );
-        },
+        showOn: () => !!document.querySelector(
+          step.attachTo.element,
+        ),
       });
-    }
-  }
+    });
+  });
+
   tour.start();
 }
 
@@ -56,20 +71,31 @@ function TourPlugin(
   { pluginUuid: uuid }: TourPluginProps,
 ): React.ReactElement<TourPluginProps> {
   BbbPluginSdk.initialize(uuid);
-  const [userListInitiallyOpened, setUserListInitiallyOpened] = React.useState(true);
   const pluginApi: PluginApi = BbbPluginSdk.getPluginApi(uuid);
-  const userListOpened = pluginApi.useUiData(UserListUiDataNames.USER_LIST_IS_OPEN, { value: true });
+  const [userListInitiallyOpened, setUserListInitiallyOpened] = React.useState(true);
+  const [presentationInitiallyOpened, setPresentationInitiallyOpened] = React.useState(true);
+
+  const userListOpened = pluginApi.useUiData(UserListUiDataNames.USER_LIST_IS_OPEN, {
+    value: true,
+  });
+
   const currentLocale = pluginApi.useUiData(IntlLocaleUiDataNames.CURRENT_LOCALE, {
     locale: 'en',
     fallbackLocale: 'en',
   });
+
+  const layoutInformation = pluginApi.useUiData(LayoutPresentatioAreaUiDataNames.CURRENT_ELEMENT, [{
+    isOpen: presentationInitiallyOpened,
+    currentElement: UiLayouts.WHITEBOARD,
+  }]);
+
   const settings = pluginApi.usePluginSettings()?.data;
 
   let messages = {};
   try {
-    messages = require(`../locales/${currentLocale.locale.replace('-', '_')}.json`)
+    messages = require(`../locales/${currentLocale.locale.replace('-', '_')}.json`);
   } catch {
-    messages = require(`../locales/${currentLocale.fallbackLocale.replace('-', '_')}.json`)
+    messages = require(`../locales/${currentLocale.fallbackLocale.replace('-', '_')}.json`);
   }
 
   const intl = createIntl({
@@ -81,23 +107,31 @@ function TourPlugin(
   useEffect(() => {
     const endTourEvents = ['cancel', 'complete'];
 
-    //restores the panel state after finishing the tour
-    endTourEvents.forEach(event => Shepherd.on(event, () => {
+    // restores the panel state after finishing the tour
+    endTourEvents.forEach((event) => Shepherd.on(event, () => {
       if (userListInitiallyOpened !== userListOpened.value) {
         if (userListInitiallyOpened) {
           pluginApi.uiCommands.sidekickOptionsContainer.open();
         } else {
           pluginApi.uiCommands.sidekickOptionsContainer.close();
         }
-      };
-      //removes events
-      endTourEvents.forEach(event => Shepherd.off(event, undefined));
+      }
+      // restores presentation state after finishing the tour
+      if (presentationInitiallyOpened !== layoutInformation[0]?.isOpen) {
+        if (presentationInitiallyOpened) {
+          pluginApi.uiCommands.presentationArea.open();
+        } else {
+          pluginApi.uiCommands.presentationArea.close();
+        }
+      }
+      // removes events
+      endTourEvents.forEach((event) => Shepherd.off(event, undefined));
     }));
     return () => {
-      //removes events
-      endTourEvents.forEach(event => Shepherd.off(event, undefined)); 
-    }
-  }, [userListOpened]);
+      // removes events
+      endTourEvents.forEach((event) => Shepherd.off(event, undefined));
+    };
+  }, [userListOpened, layoutInformation]);
 
   useEffect(() => {
     pluginApi.setOptionsDropdownItems([
@@ -106,17 +140,24 @@ function TourPlugin(
         icon: 'presentation',
         onClick: async () => {
           setUserListInitiallyOpened(userListOpened.value);
+          setPresentationInitiallyOpened(layoutInformation[0]?.isOpen);
           pluginLogger.info('Starting Tour');
           // ensure only userList is open (to also work on Mobile)
           pluginApi.uiCommands.sidekickOptionsContainer.close();
           pluginApi.uiCommands.sidekickOptionsContainer.open();
           // wait some time for the ui to update
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          startTour(intl, settings?.url, pluginApi, userListOpened.value);
+          await new Promise((resolve) => { setTimeout(resolve, 1000); });
+          startTour(
+            intl,
+            settings?.url,
+            pluginApi,
+            userListOpened.value,
+            layoutInformation[0]?.isOpen,
+          );
         },
       }),
     ]);
-  }, [userListOpened, currentLocale, settings]);
+  }, [userListOpened, currentLocale, settings, layoutInformation]);
 
   return null;
 }

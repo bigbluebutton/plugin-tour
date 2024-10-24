@@ -9,10 +9,16 @@ import {
   pluginLogger, UserListUiDataNames, IntlLocaleUiDataNames,
   LayoutPresentatioAreaUiDataNames, UiLayouts,
 } from 'bigbluebutton-html-plugin-sdk';
-import { TourPluginProps } from './types';
+import { TourPluginProps, Settings, ClientSettingsSubscriptionResultType } from './types';
 import getTourFeatures from './getTourFeatures';
 import 'shepherd.js/dist/css/shepherd.css';
 import './custom.css';
+
+export const CLIENT_SETTINGS_SUBSCRIPTION = `subscription ClientSettings {
+  meeting_clientSettings {
+    clientSettingsJson
+  }
+}`;
 
 const intlMessages = defineMessages({
   start: {
@@ -74,6 +80,7 @@ function TourPlugin(
   const pluginApi: PluginApi = BbbPluginSdk.getPluginApi(uuid);
   const [userListInitiallyOpened, setUserListInitiallyOpened] = React.useState(true);
   const [presentationInitiallyOpened, setPresentationInitiallyOpened] = React.useState(true);
+  const [settings, setSettings] = React.useState<Settings>({});
 
   const userListOpened = pluginApi.useUiData(UserListUiDataNames.USER_LIST_IS_OPEN, {
     value: true,
@@ -89,7 +96,12 @@ function TourPlugin(
     currentElement: UiLayouts.WHITEBOARD,
   }]);
 
-  const settings = pluginApi.usePluginSettings()?.data;
+  // TODO revisit when fixed
+  // const settings = pluginApi.usePluginSettings()?.data;
+
+  const { data: clientSettings } = pluginApi.useCustomSubscription<
+    ClientSettingsSubscriptionResultType
+  >(CLIENT_SETTINGS_SUBSCRIPTION);
 
   let messages = {};
   try {
@@ -103,6 +115,14 @@ function TourPlugin(
     messages,
     fallbackOnEmptyString: true,
   });
+
+  useEffect(() => {
+    const plugins = clientSettings?.meeting_clientSettings[0]?.clientSettingsJson?.public?.plugins;
+    const tourPlugin = plugins?.find((plugin) => plugin.name === 'TourPlugin');
+    if (tourPlugin && tourPlugin?.settings) {
+      setSettings(tourPlugin.settings);
+    }
+  }, [clientSettings]);
 
   useEffect(() => {
     const endTourEvents = ['cancel', 'complete'];
@@ -145,6 +165,8 @@ function TourPlugin(
           // ensure only userList is open (to also work on Mobile)
           pluginApi.uiCommands.sidekickOptionsContainer.close();
           pluginApi.uiCommands.sidekickOptionsContainer.open();
+          // ensure presentation is open before start (it will be closed after)
+          pluginApi.uiCommands.presentationArea.open();
           // wait some time for the ui to update
           await new Promise((resolve) => { setTimeout(resolve, 1000); });
           startTour(

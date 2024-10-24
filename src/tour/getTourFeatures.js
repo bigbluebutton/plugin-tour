@@ -3,7 +3,8 @@
  * @property {string} name Identifies the feature
  * @property {Date} date Refers to when the feature was "released".
  * This is used to only present features newer than the last time the user saw the tour.
- * @property {Object[]} steps An array of objects where each object is the options to a Step (Shepherd.js)
+ * @property {Object[]} steps An array of objects where
+ * each object is the options to a Step (Shepherd.js)
  * Docs: https://shepherdjs.dev/docs/Step.html#Step
  */
 
@@ -149,7 +150,14 @@ const getCloseTourButton = (intl, tour) => ({
   action: tour.complete,
 });
 
-const getTourFeatures = (intl, tour, URLS, pluginApi, userListOpened) => {
+const getTourFeatures = (
+  intl,
+  tour,
+  URLS,
+  pluginApi,
+  userListOpened,
+  presentationInitiallyOpened,
+) => {
   const actions = {
     closePanel: () => {
       pluginApi.uiCommands.sidekickOptionsContainer.close();
@@ -157,6 +165,11 @@ const getTourFeatures = (intl, tour, URLS, pluginApi, userListOpened) => {
     openUserList: () => {
       if (!userListOpened) {
         pluginApi.uiCommands.sidekickOptionsContainer.open();
+      }
+    },
+    openPresentation: () => {
+      if (!presentationInitiallyOpened) {
+        pluginApi.uiCommands.presentationArea.open();
       }
     },
   };
@@ -315,7 +328,7 @@ const getTourFeatures = (intl, tour, URLS, pluginApi, userListOpened) => {
           getNextButton(intl, tour),
         ],
         when: {
-          'before-show': () => actions.closePanel(),
+          'before-show': () => actions.openPresentation(),
         },
       },
       {
@@ -328,7 +341,7 @@ const getTourFeatures = (intl, tour, URLS, pluginApi, userListOpened) => {
           getNextButton(intl, tour),
         ],
         when: {
-          'before-show': () => actions.closePanel(),
+          'before-show': () => actions.openPresentation(),
         },
       },
       {
@@ -342,7 +355,7 @@ const getTourFeatures = (intl, tour, URLS, pluginApi, userListOpened) => {
           getNextButton(intl, tour),
         ],
         when: {
-          'before-show': () => actions.closePanel(),
+          'before-show': () => actions.openPresentation(),
         },
       },
       {
@@ -355,7 +368,7 @@ const getTourFeatures = (intl, tour, URLS, pluginApi, userListOpened) => {
           getNextButton(intl, tour),
         ],
         when: {
-          'before-show': () => actions.closePanel(),
+          'before-show': () => actions.openPresentation(),
         },
       },
     ],
@@ -527,8 +540,8 @@ const getTourFeatures = (intl, tour, URLS, pluginApi, userListOpened) => {
     videoFeature,
     screnshareFeature,
     interactionsFeature,
-    closePresentationFeature,
     whiteboardFeature,
+    closePresentationFeature,
     userListToggleFeature,
     recordingFeature,
     connectionStatusFeature,

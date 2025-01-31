@@ -6,7 +6,7 @@ import Shepherd from 'shepherd.js';
 import { IntlShape, createIntl, defineMessages } from 'react-intl';
 import {
   BbbPluginSdk, OptionsDropdownOption, PluginApi,
-  pluginLogger, UserListUiDataNames, IntlLocaleUiDataNames,
+  pluginLogger, IntlLocaleUiDataNames,
   LayoutPresentatioAreaUiDataNames, UiLayouts,
 } from 'bigbluebutton-html-plugin-sdk';
 import { TourPluginProps, Settings, ClientSettingsSubscriptionResultType } from './types';
@@ -36,7 +36,6 @@ export function startTour(
   intl: IntlShape,
   URLS: object,
   pluginApi: PluginApi,
-  userListOpened: boolean,
   presentationInitiallyOpened: boolean,
 ) {
   // Docs: https://docs.shepherdpro.com/guides/usage/
@@ -55,7 +54,6 @@ export function startTour(
     tour,
     URLS,
     pluginApi,
-    userListOpened,
     presentationInitiallyOpened,
   ).forEach((feature) => {
     feature.steps.forEach((step) => {
@@ -78,13 +76,8 @@ function TourPlugin(
 ): React.ReactElement<TourPluginProps> {
   BbbPluginSdk.initialize(uuid);
   const pluginApi: PluginApi = BbbPluginSdk.getPluginApi(uuid);
-  const [userListInitiallyOpened, setUserListInitiallyOpened] = React.useState(true);
   const [presentationInitiallyOpened, setPresentationInitiallyOpened] = React.useState(true);
   const [settings, setSettings] = React.useState<Settings>({});
-
-  const userListOpened = pluginApi.useUiData(UserListUiDataNames.USER_LIST_IS_OPEN, {
-    value: true,
-  });
 
   const currentLocale = pluginApi.useUiData(IntlLocaleUiDataNames.CURRENT_LOCALE, {
     locale: 'en',
@@ -129,13 +122,8 @@ function TourPlugin(
 
     // restores the panel state after finishing the tour
     endTourEvents.forEach((event) => Shepherd.on(event, () => {
-      if (userListInitiallyOpened !== userListOpened.value) {
-        if (userListInitiallyOpened) {
-          pluginApi.uiCommands.sidekickOptionsContainer.open();
-        } else {
-          pluginApi.uiCommands.sidekickOptionsContainer.close();
-        }
-      }
+      // reopen sidebar
+      pluginApi.uiCommands.sidekickOptionsContainer.open();
       // restores presentation state after finishing the tour
       if (presentationInitiallyOpened !== layoutInformation[0]?.isOpen) {
         if (presentationInitiallyOpened) {
@@ -151,7 +139,7 @@ function TourPlugin(
       // removes events
       endTourEvents.forEach((event) => Shepherd.off(event, undefined));
     };
-  }, [userListOpened, layoutInformation]);
+  }, [layoutInformation]);
 
   useEffect(() => {
     pluginApi.setOptionsDropdownItems([
@@ -159,7 +147,6 @@ function TourPlugin(
         label: intl.formatMessage(intlMessages.start),
         icon: 'presentation',
         onClick: async () => {
-          setUserListInitiallyOpened(userListOpened.value);
           setPresentationInitiallyOpened(layoutInformation[0]?.isOpen);
           pluginLogger.info('Starting Tour');
           // ensure only userList is open (to also work on Mobile)
@@ -173,13 +160,12 @@ function TourPlugin(
             intl,
             settings?.url,
             pluginApi,
-            userListOpened.value,
             layoutInformation[0]?.isOpen,
           );
         },
       }),
     ]);
-  }, [userListOpened, currentLocale, settings, layoutInformation]);
+  }, [currentLocale, settings, layoutInformation]);
 
   return null;
 }

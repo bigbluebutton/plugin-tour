@@ -58,13 +58,13 @@ const intlMessages = defineMessages({
     id: 'app.tour.screenshare',
     description: 'Screenshare button label',
   },
-  interactions: {
-    id: 'app.tour.interactions',
-    description: 'Interactions button label',
+  reactions: {
+    id: 'app.tour.reactions',
+    description: 'Reactions button label',
   },
-  interactionsMore: {
-    id: 'app.tour.interactionsMore',
-    description: 'More Interactions button label',
+  raiseHand: {
+    id: 'app.tour.raiseHand',
+    description: 'Raise Hand button label',
   },
   whiteboardTitle: {
     id: 'app.tour.whiteboard.title',
@@ -90,9 +90,21 @@ const intlMessages = defineMessages({
     id: 'app.tour.closePresentation',
     description: 'Close presentation label',
   },
+  mediaArea: {
+    id: 'app.tour.mediaArea',
+    description: 'Media Area label',
+  },
   userListToggle: {
     id: 'app.tour.userListToggle',
     description: 'User list toggle label',
+  },
+  profileSettings: {
+    id: 'app.tour.panel.profileSettings',
+    description: 'Profile Settings label',
+  },
+  userList: {
+    id: 'app.tour.panel.userList',
+    description: 'User List label',
   },
   sharedNotes: {
     id: 'app.tour.panel.sharedNotes',
@@ -102,6 +114,10 @@ const intlMessages = defineMessages({
     id: 'app.tour.panel.chat',
     description: 'Chat label',
   },
+  appsGallery: {
+    id: 'app.tour.panel.appsGallery',
+    description: 'Apps Gallery label',
+  },
   questions: {
     id: 'app.tour.panel.questions',
     description: 'Questions label',
@@ -110,6 +126,10 @@ const intlMessages = defineMessages({
     id: 'app.tour.plusActions',
     description: 'Plus actions label',
   },
+  sessionDetails: {
+    id: 'app.tour.sessionDetails',
+    description: 'Session details label',
+  },
   recording: {
     id: 'app.tour.recording',
     description: 'Recording button label',
@@ -117,6 +137,10 @@ const intlMessages = defineMessages({
   connectionStatus: {
     id: 'app.tour.connectionStatus',
     description: 'Connection status button label',
+  },
+  leave: {
+    id: 'app.tour.leave',
+    description: 'Leave button label',
   },
   moreOptions: {
     id: 'app.tour.moreOptions',
@@ -180,7 +204,10 @@ const getTourFeatures = (
     steps: [
       {
         id: 'microphoneToggle',
-        attachTo: { element: '[data-test="muteMicButton"]', on: 'top' },
+        attachTo: {
+          element: '[data-test="muteMicButton"], [data-test="unmuteMicButton"]',
+          on: 'top',
+        },
         text: intl.formatMessage(intlMessages.toggleMic),
         buttons: [
           getBackButton(intl, tour),
@@ -292,17 +319,39 @@ const getTourFeatures = (
     ],
   };
 
-  const interactionsFeature = {
-    name: 'interactions',
+  const reactionsFeature = {
+    name: 'reactions',
     date: new Date(0),
     steps: [
       {
-        id: 'interactions',
+        id: 'reactions',
         attachTo: {
-          element: '[id="interactionsButton"]',
+          element: '[data-test="reactionsButton"]',
           on: 'top',
         },
-        text: intl.formatMessage(intlMessages.interactions),
+        text: intl.formatMessage(intlMessages.reactions),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+        when: {
+          'before-show': () => actions.closePanel(),
+        },
+      },
+    ],
+  };
+
+  const raiseHandFeature = {
+    name: 'raiseHand',
+    date: new Date(0),
+    steps: [
+      {
+        id: 'raiseHand',
+        attachTo: {
+          element: '[data-test="raiseHandBtn"]',
+          on: 'top',
+        },
+        text: intl.formatMessage(intlMessages.raiseHand),
         buttons: [
           getBackButton(intl, tour),
           getNextButton(intl, tour),
@@ -393,6 +442,25 @@ const getTourFeatures = (
     ],
   };
 
+  const mediaAreaFeature = {
+    name: 'closePresentation',
+    date: new Date(0),
+    steps: [
+      {
+        id: 'mediaArea',
+        attachTo: { element: '[data-test="mediaAreaButton"]', on: 'top' },
+        text: intl.formatMessage(intlMessages.mediaArea),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+        when: {
+          'before-show': () => actions.closePanel(),
+        },
+      },
+    ],
+  };
+
   const userListToggleFeature = {
     name: 'userListToggle',
     date: new Date(0),
@@ -414,6 +482,33 @@ const getTourFeatures = (
     date: new Date(0),
     steps: [
       {
+        id: 'panel.profile',
+        attachTo: { element: '[data-test="profileSidebarButton"]', on: 'bottom' },
+        text: intl.formatMessage(intlMessages.profileSettings),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+      },
+      {
+        id: 'panel.userList',
+        attachTo: { element: '[data-test="usersListSidebarButton"]', on: 'bottom' },
+        text: intl.formatMessage(intlMessages.userList),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+      },
+      {
+        id: 'panel.chat',
+        attachTo: { element: '[data-test="chatButton"]', on: 'bottom' },
+        text: intl.formatMessage(intlMessages.chat),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+      },
+      {
         id: 'panel.sharedNotes',
         attachTo: { element: '[data-test="sharedNotesButton"]', on: 'bottom' },
         text: intl.formatMessage(intlMessages.sharedNotes),
@@ -426,13 +521,16 @@ const getTourFeatures = (
         },
       },
       {
-        id: 'panel.chat',
-        attachTo: { element: '[data-test="chatButton"]', on: 'bottom' },
-        text: intl.formatMessage(intlMessages.chat),
+        id: 'panel.appsGallery',
+        attachTo: { element: '[data-test="appsGallerySidebarButton"]', on: 'bottom' },
+        text: intl.formatMessage(intlMessages.appsGallery),
         buttons: [
           getBackButton(intl, tour),
           getNextButton(intl, tour),
         ],
+        when: {
+          'before-show': () => actions.openUserList(),
+        },
       },
       {
         id: 'panel.questions',
@@ -454,6 +552,25 @@ const getTourFeatures = (
         id: 'plusActions',
         attachTo: { element: '[data-test="actionsButton"]', on: 'top' },
         text: intl.formatMessage(intlMessages.plusActions),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+        when: {
+          'before-show': () => actions.closePanel(),
+        },
+      },
+    ],
+  };
+
+  const sessionDetailsFeature = {
+    name: 'sessionDetails',
+    date: new Date(0),
+    steps: [
+      {
+        id: 'sessionDetails',
+        attachTo: { element: '[data-test="presentationTitle"]', on: 'top' },
+        text: intl.formatMessage(intlMessages.sessionDetails),
         buttons: [
           getBackButton(intl, tour),
           getNextButton(intl, tour),
@@ -489,6 +606,22 @@ const getTourFeatures = (
         id: 'connectionStatus',
         attachTo: { element: '[data-test="connectionStatusButton"]', on: 'bottom' },
         text: intl.formatMessage(intlMessages.connectionStatus),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+      },
+    ],
+  };
+
+  const leaveFeature = {
+    name: 'leave',
+    date: new Date(0),
+    steps: [
+      {
+        id: 'leave',
+        attachTo: { element: '[data-test="leaveMeetingDropdown"]', on: 'bottom' },
+        text: intl.formatMessage(intlMessages.leave),
         buttons: [
           getBackButton(intl, tour),
           getNextButton(intl, tour),
@@ -539,12 +672,16 @@ const getTourFeatures = (
     audioSelectorFeature,
     videoFeature,
     screnshareFeature,
-    interactionsFeature,
+    reactionsFeature,
+    raiseHandFeature,
     whiteboardFeature,
     closePresentationFeature,
+    mediaAreaFeature,
     userListToggleFeature,
+    sessionDetailsFeature,
     recordingFeature,
     connectionStatusFeature,
+    leaveFeature,
     moreOptionsFeature,
     endTourFeature,
   ];

@@ -6,10 +6,13 @@
         "target": "es5",
         "jsx": "react",
         "allowJs": true,
-        "moduleResolution": "node",
-        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "node"
     },
+    "include": ["src/*"],
     "paths": {
-        "*": ["node_modules/@types/*", "node_modules/*"]
-    }
+        "*": ["node_modules"]
+    },
+    "exclude": [
+        "node_modules"
+    ]
 }

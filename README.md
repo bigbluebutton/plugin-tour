@@ -35,7 +35,7 @@ public:
 To build the plugin for production use, follow these steps:
 
 ```bash
-npm install
+npm ci
 npm run build-bundle
 ```
 
@@ -43,9 +43,23 @@ The above command will generate the `dist` folder, containing the bundled JavaSc
 
 Alternatively, you can host the bundled file on the BigBlueButton server by copying dist/TourPlugin.js to the folder /var/www/bigbluebutton-default/assets/plugins. In this case, the <<PLUGIN_URL>> will be https://<your-host>/plugins/TourPlugin.js.
 
+If you install the Plugin separated to the manifest, remember to change the `javascriptEntrypointUrl` in the `manifest.json` to the correct endpoint.
+
+To use the plugin in BigBlueButton, send this parameter along in create call:
+
+```
+pluginManifests=[{"url":"<your-domain>/path/to/manifest.json"}]
+```
+
+Or additionally, you can add this same configuration in the `.properties` file from `bbb-web` in `/etc/bigbluebutton/bbb-web.properties`
+
+## Development mode
+
+As for development mode (running this plugin from source), please, refer back to https://github.com/bigbluebutton/bigbluebutton-html-plugin-sdk section `Running the Plugin from Source`
+
 ## Background
 
-BigBlueButton added supports for plugins in 2024 with BBB 3.0.
+BigBlueButton added supports for plugins in 2025 with BBB 3.0.
 Check the official [documentation website](https://docs.bigbluebutton.org) for more information.
 
 This plugin repository was created using the plugin [template repository for BigBlueButton](https://github.com/bigbluebutton/plugin-template) hosted on GitHub.

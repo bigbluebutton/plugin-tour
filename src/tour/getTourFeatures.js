@@ -62,6 +62,14 @@ const intlMessages = defineMessages({
     id: 'app.tour.interactions',
     description: 'Interactions button label',
   },
+  raiseHand: {
+    id: 'app.tour.raiseHand',
+    description: 'Raise hand button label',
+  },
+  leaveSession: {
+    id: 'app.tour.leaveSession',
+    description: 'Leave session button label',
+  },
   interactionsMore: {
     id: 'app.tour.interactionsMore',
     description: 'More Interactions button label',
@@ -314,6 +322,28 @@ const getTourFeatures = (
     ],
   };
 
+  const raiseHandFeature = {
+    name: 'raiseHand',
+    date: new Date(0),
+    steps: [
+      {
+        id: 'raiseHand',
+        attachTo: {
+          element: '[data-test="raiseHandBtn"]',
+          on: 'top',
+        },
+        text: intl.formatMessage(intlMessages.raiseHand),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+        when: {
+          'before-show': () => actions.closePanel(),
+        },
+      },
+    ],
+  };
+
   const whiteboardFeature = {
     name: 'whiteboard',
     date: new Date(0),
@@ -497,6 +527,22 @@ const getTourFeatures = (
     ],
   };
 
+  const leaveSessionFeature = {
+    name: 'leaveSession',
+    date: new Date(0),
+    steps: [
+      {
+        id: 'leaveSession',
+        attachTo: { element: '[data-test="leaveMeetingDropdown"]', on: 'bottom' },
+        text: intl.formatMessage(intlMessages.leaveSession),
+        buttons: [
+          getBackButton(intl, tour),
+          getNextButton(intl, tour),
+        ],
+      },
+    ],
+  };
+
   const moreOptionsFeature = {
     name: 'moreOptions',
     date: new Date(0),
@@ -540,11 +586,13 @@ const getTourFeatures = (
     videoFeature,
     screnshareFeature,
     interactionsFeature,
+    raiseHandFeature,
     whiteboardFeature,
     closePresentationFeature,
     userListToggleFeature,
     recordingFeature,
     connectionStatusFeature,
+    leaveSessionFeature,
     moreOptionsFeature,
     endTourFeature,
   ];

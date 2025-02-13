@@ -8,28 +8,6 @@ This plugins adds a button in the options dropdown menu to start a Tour to guide
 
 You can configure some "Learn More" links that are shown in some steps (screenshare, whiteboard, general) in the settings of the plugin, see example below.
 
-## Running the Plugin From Source Code
-
-1. Start the development server:
-
-```bash
-npm install
-npm start
-```
-
-2. Add this to the `settings.yml` of the BBB HTML5-client:
-```yaml
-public:
-  plugins:
-    - name: TourPlugin
-      url: <<PLUGIN_URL>>
-      settings:
-        url:
-          screenshare: "https://some.url.with.more.information"
-          whiteboard: "https://some.url.with.more.information"
-          general: "https://some.url.with.more.information"
-```
-
 ## Building the Plugin
 
 To build the plugin for production use, follow these steps:

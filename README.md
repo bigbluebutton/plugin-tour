@@ -22,7 +22,6 @@ npm start
 public:
   plugins:
     - name: TourPlugin
-      url: <<PLUGIN_URL>>
       settings:
         url:
           screenshare: "https://some.url.with.more.information"

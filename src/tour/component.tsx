@@ -7,7 +7,7 @@ import { IntlShape, createIntl, defineMessages } from 'react-intl';
 import {
   BbbPluginSdk, OptionsDropdownOption, PluginApi,
   pluginLogger, UserListUiDataNames, IntlLocaleUiDataNames,
-  LayoutPresentatioAreaUiDataNames, UiLayouts,
+  LayoutPresentationAreaUiDataNames, UiLayouts,
 } from 'bigbluebutton-html-plugin-sdk';
 import { TourPluginProps, Settings, ClientSettingsSubscriptionResultType } from './types';
 import getTourFeatures from './getTourFeatures';
@@ -91,10 +91,13 @@ function TourPlugin(
     fallbackLocale: 'en',
   });
 
-  const layoutInformation = pluginApi.useUiData(LayoutPresentatioAreaUiDataNames.CURRENT_ELEMENT, [{
-    isOpen: presentationInitiallyOpened,
-    currentElement: UiLayouts.WHITEBOARD,
-  }]);
+  const layoutInformation = pluginApi.useUiData(
+    LayoutPresentationAreaUiDataNames.CURRENT_ELEMENT,
+    [{
+      isOpen: presentationInitiallyOpened,
+      currentElement: UiLayouts.WHITEBOARD,
+    }],
+  );
 
   // TODO revisit when fixed
   // const settings = pluginApi.usePluginSettings()?.data;

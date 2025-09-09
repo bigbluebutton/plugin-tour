@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import Shepherd from 'shepherd.js';
 import { IntlShape, createIntl, defineMessages } from 'react-intl';
+import { StepOptions } from 'shepherd.js/dist/cjs/step';
 import {
   BbbPluginSdk, OptionsDropdownOption, PluginApi,
   pluginLogger, UserListUiDataNames, IntlLocaleUiDataNames,
@@ -59,14 +60,13 @@ export function startTour(
     presentationInitiallyOpened,
   ).forEach((feature) => {
     feature.steps.forEach((step) => {
-      /* @ts-ignore */
-      tour.addStep({
+      tour.addStep(({
         ...step,
         // Only show step if the element is visible
         showOn: () => !!document.querySelector(
           step.attachTo.element,
         ),
-      });
+      }) as StepOptions);
     });
   });
 

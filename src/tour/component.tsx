@@ -1,5 +1,3 @@
-/* eslint-disable global-require */
-/* eslint-disable import/no-dynamic-require */
 import * as React from 'react';
 import { useEffect } from 'react';
 import Shepherd from 'shepherd.js';
@@ -102,6 +100,8 @@ function TourPlugin(
   // TODO revisit when fixed
   // const settings = pluginApi.usePluginSettings()?.data;
 
+  /* eslint-disable import/no-dynamic-require, global-require,
+   @typescript-eslint/no-require-imports */
   const { data: clientSettings } = pluginApi.useCustomSubscription<
     ClientSettingsSubscriptionResultType
   >(CLIENT_SETTINGS_SUBSCRIPTION);
@@ -112,6 +112,8 @@ function TourPlugin(
   } catch {
     messages = require(`../locales/${currentLocale.fallbackLocale.replace('-', '_')}.json`);
   }
+  /* eslint-disable import/no-dynamic-require, global-require,
+  @typescript-eslint/no-require-imports */
 
   const intl = createIntl({
     locale: currentLocale.locale,
@@ -148,7 +150,7 @@ function TourPlugin(
         }
       }
       // removes events
-      endTourEvents.forEach((event) => Shepherd.off(event, undefined));
+      endTourEvents.forEach((endTourEvent) => Shepherd.off(endTourEvent, undefined));
     }));
     return () => {
       // removes events
